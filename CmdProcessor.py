@@ -32,20 +32,15 @@ class CmdProcessor:
                 print(FuncName + ": shows available commands.")
                 print(FuncName + " [funcion-name]: Shows details about a command.")
             elif FuncName == "stats":
-                print("stats database: Shows all the words in the database")
-                print("stats hints: Shows all the words in the database")
+                print("stats: Shows all the words in the database")
             elif FuncName == "add":
                 print("add [urls... + filepaths... + words...]: Reads web pages, files and words and puts them in the database.")
             elif FuncName == "remove":
                 print("remove [urls... + filepaths... + words...]: Reads web pages, files and words and removes them from the database.")
             elif FuncName == "save":
                 print("save: Saves the current database in valid-words.txt. If file does not exist, it is created")
-            elif FuncName == "match":
-                print("match [hinted-word]: Reads the hint and reduces word posibilities.")
-                print("match: Output the best word.")
             elif FuncName == "reset":
-                print("reset database: Clears the database.")
-                print("reset hints: Resets all hints.")
+                print("reset: Clears the database.")
             else:
                 print("Command name is not recognized!")
         else:
@@ -53,22 +48,12 @@ class CmdProcessor:
 
     def processStats(self, args = None, forced = False):
         if len(args) == 1:
-            if args[0] == "database":
-                for word in self.valids:
-                    print(word, end = " ")
-                if len(self.valids) == 1:
-                    print("\n1 word was found")
-                else:
-                    print("\n" + str(len(self.valids)) + " words were found")
-            elif args[0] == "hints":
-                for hint in self.Hints:
-                    print(hint)
-                if len(self.Hints) == 1:
-                    print("1 hint was found")
-                else:
-                    print(str(len(self.Hints)) + " hints were found")
+            for word in self.valids:
+                print(word, end = " ")
+            if len(self.valids) == 1:
+                print("\n1 word was found")
             else:
-                print("The 'stats' command only accepts as argument 'database' or 'hints'!")
+                print("\n" + str(len(self.valids)) + " words were found")
         else:
             print("The 'stats' command only accepts one argument!")
 
@@ -112,9 +97,6 @@ class CmdProcessor:
         added = len(self.valids)
         self.valids = self.valids.union(news)
         added = len(self.valids) - added
-        for word in news:
-            if self.Check.check(word):
-                self.remains.add(word)
         if added == 0:
             print("0 words were added.")
         elif added == 1:
@@ -129,7 +111,6 @@ class CmdProcessor:
         removed = len(self.valids)
         self.valids = self.valids.difference(news)
         removed -= len(self.valids)
-        self.remains = self.remains.difference(news)
         if removed == 0:
             print("0 words were removed.")
         elif removed == 1:
@@ -152,72 +133,14 @@ class CmdProcessor:
 
     # Solve functions
 
-    Check = WordChecker()
-    remains = set()
-
-    def processMatch(self, args = None, forced = False):
-        if len(args) == 0:
-            if len(self.remains) >= 10:
-                print("10 random words: ", end = "")
-                chosen = sample(self.remains, 10)
-                for word in chosen:
-                    print(word, end = " ")
-            else:
-                print(str(len(self.remains)) + " random words: ", end = "")
-                for word in self.remains:
-                    print(word, end = " ")
-            print("")
-        else:
-            print("The 'reset' command only accepts zero arguments!")
-
-    def processHint(self, args = None, forced = False):
-        if len(args) == 1:
-            hint = args[0].upper()
-            invalid = False
-            for index in range(0, 10):
-                if index & 1 == 0:
-                    if hint[index] != '-' and hint[index] != '~' and hint[index] != '+':
-                        invalid = True
-                        break
-                else:
-                    if 'A' > hint[index] and hint[index] > 'Z':
-                        invalid = True
-                        break
-            if invalid:
-                print("Invalid hint was typed!")
-            else:
-                self.Hints.append(hint)
-                self.Check.update(hint)
-                newRemains = set()
-                for word in self.remains:
-                    if self.Check.check(word):
-                        newRemains.add(word)
-                self.remains = newRemains
-                if len(self.remains) == 1:
-                    print("Hint added, 1 word remains.")
-                else:
-                    print("Hint added, " + len(self.remains) + " words remain.")
-        else:
-            print("The 'hint' command only accepts one argument!")
-
     def processReset(self, args = None, forced = False):
         if len(args) == 1:
-            if args[0] == "database":
-                if not forced:
-                    if str(input("Are you sure you want to clear the database? (Y/n)")) != "Y":
-                        return
-                self.valids = set()
-                self.unsaved = True
-                print("Database cleared.")
-            elif args[0] == "hints":
-                if not forced:
-                    if str(input("Are you sure you want to reset hints? (Y/n)")) != "Y":
-                        return
-                self.Hints = []
-                self.remains = self.valids
-                print("Hints reset.")
-            else:
-                print("The 'reset' command only accepts as argument 'database' or 'hints'!")
+            if not forced:
+                if str(input("Are you sure you want to clear the database? (Y/n)")) != "Y":
+                    return
+            self.valids = set()
+            self.unsaved = True
+            print("Database cleared.")
         else:
             print("The 'reset' command only accepts one argument!")
 
