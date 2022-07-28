@@ -108,10 +108,13 @@ class CmdProcessor:
         return ans
 
     def processAdd(self, args = None, forced = False):
-        added = len(self.valids)
         news = self.getWords(args)
+        added = len(self.valids)
         self.valids = self.valids.union(news)
         added = len(self.valids) - added
+        for word in news:
+            if self.Check.check(word):
+                self.remains.add(word)
         if added == 0:
             print("0 words were added.")
         elif added == 1:
@@ -122,9 +125,11 @@ class CmdProcessor:
             self.unsaved = True
 
     def processRemove(self, args = None, forced = False):
+        news = self.getWords(args)
         removed = len(self.valids)
-        self.valids = self.valids.difference(self.getWords(args))
+        self.valids = self.valids.difference(news)
         removed -= len(self.valids)
+        self.remains = self.remains.difference(news)
         if removed == 0:
             print("0 words were removed.")
         elif removed == 1:
@@ -182,7 +187,12 @@ class CmdProcessor:
                 print("Invalid hint was typed!")
             else:
                 self.Hints.append(hint)
-                # TODO: filter words
+                self.Check.update(hint)
+                newRemains = set()
+                for word in self.remains:
+                    if self.Check.check(word):
+                        newRemains.add(word)
+                self.remains = newRemains
                 if len(self.remains) == 1:
                     print("Hint added, 1 word remains.")
                 else:
