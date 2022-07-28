@@ -25,6 +25,8 @@ while True:
     # Solve commands
     elif cmd == "match":
         cmdProcessor.processMatch(args)
+    elif cmd == "hint":
+        cmdProcessor.processHint(args)
     elif cmd == "reset":
         cmdProcessor.processReset(args)
     elif cmd != "":

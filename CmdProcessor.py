@@ -1,9 +1,18 @@
+from importlib import invalidate_caches
 import os
 import requests
 
-# from WordSelector import WordSelector
+# from WordCheker import WordCheker
 
 class CmdProcessor:
+
+    # Constructor
+
+    def __init__(self):
+        if os.path.isfile("valid-words.txt"):
+            print("The file 'valid-words.txt' was found! All ", end = "")
+            self.processAdd(["valid-words.txt"])
+            self.unsaved = False
 
     # Info functions
 
@@ -49,7 +58,12 @@ class CmdProcessor:
                 else:
                     print("\n" + str(len(self.valids)) + " words were found")
             elif args[0] == "hints":
-                print("TODO: not implemented")
+                for hint in self.Hints:
+                    print(hint)
+                if len(self.Hints) == 1:
+                    print("1 hint was found")
+                else:
+                    print(str(len(self.Hints)) + " hints were found")
             else:
                 print("The 'stats' command only accepts as argument 'database' or 'hints'!")
         else:
@@ -57,7 +71,7 @@ class CmdProcessor:
 
     # Database functions
 
-    unsaved = False;
+    unsaved = False
     valids = set()
 
     def isAlpha(self, word):
@@ -83,16 +97,17 @@ class CmdProcessor:
                 words.add(source)
         ans = set()
         for word in words:
-            word = word.lower()
+            word = word.upper()
             if len(word) == 6 and not self.isAlpha(word[5]):
                 word = word.removesuffix(word[5])
             if len(word) == 5 and self.isAlpha(word):
-                ans.add(word.lower())
+                ans.add(word.upper())
         return ans
 
     def processAdd(self, args = None):
         added = len(self.valids)
-        self.valids = self.valids.union(self.getWords(args))
+        news = self.getWords(args)
+        self.valids = self.valids.union(news)
         added = len(self.valids) - added
         if added == 0:
             print("0 words were added.")
@@ -117,17 +132,47 @@ class CmdProcessor:
             self.unsaved = True
 
     def processSave(self):
-        OutHandle = open("valid-words.txt", "wt")
-        for word in self.valids:
-            OutHandle.write(word + " ")
-        self.unsaved = False;
-        print(str(len(self.valids)) + "words saved in 'valid-words.txt'.")
-        OutHandle.close()
+        if self.unsaved:
+            OutHandle = open("valid-words.txt", "wt")
+            for word in self.valids:
+                OutHandle.write(word + " ")
+            self.unsaved = False;
+            print("All " + str(len(self.valids)) + " words have been saved in 'valid-words.txt'.")
+            OutHandle.close()
+        else:
+            print("There are no changes to save!")
 
     # Solve functions
 
+    # TODO: add the word selector class
+
     def processMatch(self, args = None):
-        print("Process command 'match'")
+        if len(args) == 0:
+            # TODO: get word
+            print("Best 10 words: " + "")
+        else:
+            print("The 'reset' command only accepts zero arguments!")
+
+    def processHint(self, args = None):
+        if len(args) == 1:
+            hint = args[0].upper()
+            invalid = False
+            for index in range(0, 10):
+                if index & 1 == 0:
+                    if hint[index] != '-' and hint[index] != '~' and hint[index] != '+':
+                        invalid = True
+                        break
+                else:
+                    if 'A' > hint[index] and hint[index] > 'Z':
+                        invalid = True
+                        break
+            if invalid:
+                print("Invalid hint was typed!")
+            else:
+                # TODO: add hint
+                self.Hints.append(hint)
+        else:
+            print("The 'hint' command only accepts one argument!")
 
     def processReset(self, args = None):
         if len(args) == 1:
@@ -139,7 +184,11 @@ class CmdProcessor:
                 self.unsaved = True
                 print("Database cleared.")
             elif args[0] == "hints":
-                print("TODO: not implemented")
+                if str(input("You have unsaved changes in the database! Are you sure you want to clear it? (Y/n)")) != "Y":
+                    return
+                self.Hints = []
+                # TODO: reset hints
+                print("Hints reset.")
             else:
                 print("The 'reset' command only accepts as argument 'database' or 'hints'!")
         else:
