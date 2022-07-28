@@ -1,6 +1,6 @@
 import CmdProcessor as cp
 
-print("Welcome to Wordle helper!")
+print("Welcome to Wordle collector!")
 cmdProcessor = cp.CmdProcessor()
 while True:
     while True:

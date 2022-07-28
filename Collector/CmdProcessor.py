@@ -1,25 +1,17 @@
-from importlib import invalidate_caches
-from math import remainder
 import os
 import requests
-
-from WordChecker import WordChecker
-from random import sample
 
 class CmdProcessor:
 
     # Constructor
 
     def __init__(self):
-        if os.path.isfile("valid-words.txt"):
+        if os.path.isfile("/./valid-words.txt"):
             print("The file 'valid-words.txt' was found! All ", end = "")
-            self.processAdd(["valid-words.txt"])
+            self.processAdd(["/./valid-words.txt"])
             self.unsaved = False
-        self.processReset(["hints"], True)
 
     # Info functions
-
-    Hints = []
 
     def processHelp(self, args = None, forced = False):
         if not args:
@@ -47,7 +39,7 @@ class CmdProcessor:
             print("The 'help' command only accepts zero or one arguments!")
 
     def processStats(self, args = None, forced = False):
-        if len(args) == 1:
+        if len(args) == 0:
             for word in self.valids:
                 print(word, end = " ")
             if len(self.valids) == 1:
@@ -55,7 +47,7 @@ class CmdProcessor:
             else:
                 print("\n" + str(len(self.valids)) + " words were found")
         else:
-            print("The 'stats' command only accepts one argument!")
+            print("The 'stats' command only accepts zero arguments!")
 
     # Database functions
 
@@ -85,11 +77,11 @@ class CmdProcessor:
                 words.add(source)
         ans = set()
         for word in words:
-            word = word.upper()
+            word = word.lower()
             if len(word) == 6 and not self.isAlpha(word[5]):
                 word = word.removesuffix(word[5])
             if len(word) == 5 and self.isAlpha(word):
-                ans.add(word.upper())
+                ans.add(word.lower())
         return ans
 
     def processAdd(self, args = None, forced = False):
@@ -131,10 +123,8 @@ class CmdProcessor:
         else:
             print("There are no changes to save!")
 
-    # Solve functions
-
     def processReset(self, args = None, forced = False):
-        if len(args) == 1:
+        if len(args) == 0:
             if not forced:
                 if str(input("Are you sure you want to clear the database? (Y/n)")) != "Y":
                     return
@@ -142,7 +132,7 @@ class CmdProcessor:
             self.unsaved = True
             print("Database cleared.")
         else:
-            print("The 'reset' command only accepts one argument!")
+            print("The 'reset' command only accepts zero arguments!")
 
 if __name__ == "__main__":
     pass
